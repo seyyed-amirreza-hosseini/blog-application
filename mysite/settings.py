@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
     'taggit',
     'blog.apps.BlogConfig',
 ]
@@ -132,3 +134,5 @@ EMAIL_HOST_PASSWORD = 'brrvrldgbeceuecb'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL ='My Blog <hosseiniseyyedamirreza2003@gmail.com>'
+
+SITE_ID = 1
