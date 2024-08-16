@@ -5,6 +5,7 @@ from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from django.db.models import Count
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.contrib.postgres.search import TrigramSimilarity
 from taggit.models import Tag
 from .models import Post, Comment
 from .forms import EmailPostForm, CommentForm, SearchForm
@@ -109,16 +110,18 @@ def post_search(request):
     form = SearchForm()
     query = None
     results = []
-
-    print(request.GET)
+    
     if 'query' in request.GET:
         form = SearchForm(request.GET)
         if form.is_valid():
             query = form.cleaned_data['query']
-            search_vector = SearchVector('title', weight='A') + SearchVector('body', weight='B')
-            search_query = SearchQuery(query, config='english')
-            search_rank = SearchRank(search_vector, search_query)
-            results = Post.published.annotate(
-                search=search_vector, rank=search_rank).filter(rank__gte=0.3).order_by('-rank')
+            results = (
+                Post.published.annotate(
+                    similarity=TrigramSimilarity('title', query),
+                )
+                .filter(similarity__gt=0.1)
+                .order_by('-similarity')
+            )
 
-    return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})        
+    return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})
+        
